@@ -3,7 +3,6 @@ import { FcGoogle } from "react-icons/fc";
 import { Card, Separator } from "@heroui/react";
 import {
   Button,
-  Description,
   FieldError,
   Form,
   Input,
@@ -14,26 +13,23 @@ import { authClient } from "@/lib/auth-client";
 import { redirect } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { Stethoscope, User, Mail, Lock, Image as ImageIcon } from "lucide-react";
+import { Stethoscope, Mail, Lock, LogIn } from "lucide-react";
 
-const SignUpPage = () => {
+const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    console.log("===== FORM SUBMITTED =====");
     setIsLoading(true);
     setErrorMessage("");
 
     const formData = new FormData(e.currentTarget);
     const user = Object.fromEntries(formData.entries());
 
-    const { data, error } = await authClient.signUp.email({
+    const { data, error } = await authClient.signIn.email({
       email: user.email,
       password: user.password,
-      name: user.name,
-      image: user.image,
     });
 
     setIsLoading(false);
@@ -43,7 +39,7 @@ const SignUpPage = () => {
     }
 
     if (error) {
-      setErrorMessage(error.message || "Something went wrong. Please try again.");
+      setErrorMessage(error.message || "Invalid email or password. Please try again.");
     }
   };
 
@@ -63,8 +59,8 @@ const SignUpPage = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-lg mb-4">
             <Stethoscope className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Create Account</h1>
-          <p className="text-slate-500">Join DocAppoint and start your healthcare journey</p>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">Welcome Back</h1>
+          <p className="text-slate-500">Sign in to continue your healthcare journey</p>
         </div>
 
         {/* Main Card */}
@@ -77,31 +73,8 @@ const SignUpPage = () => {
               </div>
             )}
 
-            {/* Sign Up Form */}
+            {/* Sign In Form */}
             <Form onSubmit={onSubmit} className="flex flex-col gap-5">
-              <TextField isRequired name="name" type="text">
-                <Label className="text-sm font-semibold text-slate-700">Full Name</Label>
-                <Input 
-                  placeholder="Dr. Rahim Uddin" 
-                  className="rounded-lg"
-                  
-                />
-                <FieldError />
-              </TextField>
-
-              <TextField name="image" type="url">
-                <Label className="text-sm font-semibold text-slate-700">Profile Picture URL</Label>
-                <Input 
-                  placeholder="https://example.com/doctor-avatar.jpg" 
-                  className="rounded-lg"
-                  
-                />
-                <Description className="text-xs text-slate-400">
-                  Optional: Add a profile picture URL
-                </Description>
-                <FieldError />
-              </TextField>
-
               <TextField
                 isRequired
                 name="email"
@@ -117,41 +90,35 @@ const SignUpPage = () => {
                 <Input 
                   placeholder="doctor@docappoint.com" 
                   className="rounded-lg"
-                 
+                  type="email"
                 />
                 <FieldError />
               </TextField>
 
               <TextField
                 isRequired
-                minLength={8}
                 name="password"
                 type="password"
-                validate={(value) => {
-                  if (value.length < 8) {
-                    return "Password must be at least 8 characters";
-                  }
-                  if (!/[A-Z]/.test(value)) {
-                    return "Password must contain at least one uppercase letter";
-                  }
-                  if (!/[0-9]/.test(value)) {
-                    return "Password must contain at least one number";
-                  }
-                  return null;
-                }}
               >
                 <Label className="text-sm font-semibold text-slate-700">Password</Label>
                 <Input 
                   placeholder="Enter your password" 
                   className="rounded-lg"
                   type="password"
-                  
+                 
                 />
-                <Description className="text-xs text-slate-400">
-                  Must be at least 8 characters with 1 uppercase letter and 1 number
-                </Description>
                 <FieldError />
               </TextField>
+
+              {/* Forgot Password Link */}
+              <div className="text-right">
+                <Link 
+                  href="/forgot-password" 
+                  className="text-xs text-teal-600 hover:text-teal-700 hover:underline transition-colors"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
 
               <Button 
                 className="rounded-lg w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold py-3 transition-all duration-200 shadow-md hover:shadow-lg"
@@ -164,14 +131,14 @@ const SignUpPage = () => {
                   </svg>
                 }
               >
-                {isLoading ? "Creating Account..." : "Create Account"}
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </Form>
 
             {/* Divider */}
             <div className="flex items-center justify-center gap-3 my-6">
               <Separator className="flex-1" />
-              <span className="text-xs text-slate-400 uppercase tracking-wider">Or sign up with</span>
+              <span className="text-xs text-slate-400 uppercase tracking-wider">Or continue with</span>
               <Separator className="flex-1" />
             </div>
 
@@ -186,13 +153,31 @@ const SignUpPage = () => {
               <span className="font-semibold text-slate-700">Sign in with Google</span>
             </Button>
 
-            {/* Login Link */}
-            <p className="text-center text-sm text-slate-500 mt-6">
-              Already have an account?{' '}
-              <Link href="/login" className="font-semibold text-teal-600 hover:text-teal-700 hover:underline transition-colors">
-                Sign in here
-              </Link>
-            </p>
+            {/* Sign Up Link */}
+           <p className="text-center text-sm text-slate-500 mt-6">
+  Do not have an account?{' '}
+  <Link 
+    href="/register"    // ← "register" এ পরিবর্তন করুন
+    className="font-semibold text-teal-600 hover:text-teal-700 hover:underline transition-colors"
+  >
+    Create Account
+  </Link>
+</p>
+
+            {/* Demo Credentials (Development only) */}
+            <div className="mt-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-xs text-slate-500 text-center mb-2">Demo Credentials</p>
+              <div className="flex justify-center gap-4 text-xs">
+                <div>
+                  <span className="font-semibold text-slate-700">Email:</span>
+                  <span className="text-slate-500 ml-1">demo@docappoint.com</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-700">Password:</span>
+                  <span className="text-slate-500 ml-1">Demo@123</span>
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
       </div>
@@ -200,4 +185,4 @@ const SignUpPage = () => {
   );
 };
 
-export default SignUpPage;
+export default LoginPage;
